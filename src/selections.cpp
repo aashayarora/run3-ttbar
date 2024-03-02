@@ -1,4 +1,4 @@
-#include "main.hpp"
+#include "common.hpp"
 
 namespace Lepton {
     RNode triggers(RNode df) {
@@ -7,15 +7,15 @@ namespace Lepton {
     RNode preSelections(RNode df) {
         return df.Filter("nElectron == 1 && nMuon == 1", "has one electron and one muon")
             .Filter("Electron_charge[0] != Muon_charge[0]", "Leptons are os")
-            .Filter("Electron_cutBased[0] >= 2", "passes loose_id")
             .Filter("Electron_pt[0] > 15", "passes pt cut")
             .Filter("abs(Electron_eta[0]) < 2.5", "passes eta cut")
             .Filter("abs(Electron_dxy[0]) < 0.1 && abs(Electron_dz[0]) < 0.2", "electron passes dxyz")
+            .Filter("Electron_cutBased[0] >= 2", "passes loose_id")
             .Filter("Electron_mvaIso_WP80[0]", "passes electron mvaIso WP80")
-            .Filter("Muon_looseId[0]", "passes loose_id")
-            .Filter("Muon_pt[0] > 25", "passes pt cut")
+            .Filter("Muon_pt[0] > 30", "passes pt cut")
             .Filter("abs(Muon_eta[0]) < 2.4", "passes eta cut")
             .Filter("abs(Muon_dxy[0]) < 0.1 && abs(Muon_dz[0]) < 0.2", "muon passes dxyz")
+            .Filter("Muon_looseId[0]", "passes loose_id")
             .Filter("Muon_pfIsoId[0] >= 4", "passes tight muon iso");
     }
     RNode defineVariables(RNode df) {
@@ -44,17 +44,14 @@ namespace Lepton {
 
 namespace Jet {
     RNode preSelections(RNode df) {
-        return df.Filter("nJet >= 1", "has atleast one jet")
-            .Filter("Any(Jet_pt > 30 && abs(Jet_eta) < 2.5)", "jet pt and eta cut");
+        return df.Filter("nJet >= 2", "has atleast two jets")
+            .Filter("Any(Jet_pt > 30 && abs(Jet_eta) < 2.5)", "jet pt and eta cut")
+            .Define("nBJet", "Sum(Jet_btagPNetB > 0.6)")
+            .Filter("nBJet >= 1", "has atleast 1 bJets");
     }
-    
-    RNode defineVariables(RNode df) {
-        return df.Define("num_jets", "nJet");
-    }   
 
     RNode selections(RNode df) {
-        auto df1 = preSelections(df);
-        auto df_last = defineVariables(df1);
+        auto df_last = preSelections(df);
         return df_last;
     }
 }

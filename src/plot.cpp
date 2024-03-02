@@ -1,4 +1,4 @@
-#include "main.hpp"
+#include "common.hpp"
 
 void makeHist(ROOT::RDF::RResultPtr<TH1D> mc, ROOT::RDF::RResultPtr<TH1D> data, const std::string &x_label, const std::string &filename)
 {
@@ -46,8 +46,8 @@ void makeHist(ROOT::RDF::RResultPtr<TH1D> mc, ROOT::RDF::RResultPtr<TH1D> data, 
     c->Clear();
 }
 
-RooDataSet fit(, RNode df) {   
-    RooRealVar x(var.c_str(), v.c_str(), 0, 200);
-    ROOT::RDF::RResultPtr<RooDataSet> rooDataSetResult = df.Book<double>(RooDataSetHelper("RooDataSet", "RooDataSet", RooArgSet(pt)), {"pt"});
+RooDataSet fit(std::string var, RNode df) {   
+    RooRealVar x(var.c_str(), var.c_str(), 0, 200);
+    ROOT::RDF::RResultPtr<RooDataSet> rooDataSetResult = df.Book<double>(RooDataSetHelper("RooDataSet", "RooDataSet", RooArgSet(x)), {var.c_str()});
     return *rooDataSetResult;
 }

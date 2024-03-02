@@ -1,5 +1,5 @@
-#ifndef MAIN_H
-#define MAIN_H
+#ifndef COMMON_H
+#define COMMON_H
 
 // C++ Includes
 #include <iostream>
@@ -35,6 +35,8 @@
 using json = nlohmann::json;
 using std::cout, std::endl;
 using RNode = ROOT::RDF::RNode;
+using correction::CorrectionSet;
+using ROOT::VecOps::RVec;
 
 namespace Lepton {
     RNode triggers(RNode df);
@@ -52,12 +54,12 @@ namespace Jet {
 namespace Weights {
     RNode goodRun(RNode df, json jf);
     RNode xsecWeights(RNode df);
-    RNode primaryVerticesNormalization(RNode df_mc);
+    RNode leptonScaleFactors(RNode df);
+    RNode pileupCorrection(RNode df);
 }
 
 // Plotting
 void makeHist(ROOT::RDF::RResultPtr<TH1D> mc, ROOT::RDF::RResultPtr<TH1D> data, const std::string &x_label, const std::string &filename);
 
-RooDataSet fit(RNode df);
-
+RooDataSet fit(std::string var, RNode df);
 #endif
