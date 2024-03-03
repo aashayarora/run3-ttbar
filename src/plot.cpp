@@ -18,12 +18,12 @@ void makeHist(ROOT::RDF::RResultPtr<TH1D> mc, ROOT::RDF::RResultPtr<TH1D> data, 
     h_data.SetMarkerColor(kBlack);
     h_data.SetLineColor(kBlack);
 
-    auto rp = new TRatioPlot(&h_mc, &h_data);
+    auto rp = new TRatioPlot(&h_data, &h_mc);
     rp->Draw();
     rp->GetLowYaxis()->SetNdivisions(505);
 
     rp->GetUpperRefYaxis()->SetTitle("Events");
-    rp->GetLowerRefYaxis()->SetTitle("MC/Data");
+    rp->GetLowerRefYaxis()->SetTitle("Data/MC");
     rp->GetUpperPad()->cd();
 
     TLegend legend(.8,.75,.89,.89);
@@ -38,8 +38,8 @@ void makeHist(ROOT::RDF::RResultPtr<TH1D> mc, ROOT::RDF::RResultPtr<TH1D> data, 
     cms_label.SetTextSize(0.04);
     cms_label.DrawLatexNDC(0.16, 0.965, "#bf{CMS} #it{Exercise}");
     TLatex header;
-    header.SetTextSize(0.03);
-    header.DrawLatexNDC(0.63, 0.92, "#sqrt{s} = 13.6 TeV, L_{int} = 3.1 fb^{-1}");
+    header.SetTextSize(0.04);
+    header.DrawLatexNDC(0.63, 0.965, "#sqrt{s} = 13.6 TeV, L_{int} = 27 fb^{-1}");
 
     c->Update();
     c->SaveAs(filename.c_str());

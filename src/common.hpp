@@ -10,6 +10,7 @@
 // RDF Includes
 #include "ROOT/RDataFrame.hxx"
 #include "ROOT/RDFHelpers.hxx"
+#include "ROOT/RVec.hxx"
 
 // ROOT Includes
 #include "TChain.h"
@@ -53,7 +54,7 @@ namespace Jet {
 
 namespace Weights {
     RNode goodRun(RNode df, json jf);
-    RNode xsecWeights(RNode df);
+    RNode xsecWeights(RNode df, double xsec, double int_lumi, double n_events);
     RNode leptonScaleFactors(RNode df);
     RNode pileupCorrection(RNode df);
 }

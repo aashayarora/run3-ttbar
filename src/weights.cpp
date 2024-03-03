@@ -1,11 +1,8 @@
 #include "common.hpp"
 
 namespace Weights {
-    RNode xsecWeights(RNode df) {
-        double dy_xsec = 98.88; //pb
-        double int_lumi = 21007; // pb^-1
-        double n_events = 1417357887.633;
-        double weight = dy_xsec * int_lumi / n_events;
+    RNode xsecWeights(RNode df, double xsec, double int_lumi, double n_events) {
+        double weight = xsec * int_lumi / n_events;
         auto calcWeight = [weight](float genWeight){return genWeight * weight;};
         return df.Define("weights", calcWeight, {"genWeight"});
     }
@@ -23,19 +20,19 @@ namespace Weights {
         auto electron_cset = CorrectionSet::from_file("configs/scalefactors/electron.json");
         auto electronscalefactors = electron_cset->at("Electron-ID-SF");
 
-        auto electron_eval_correction = [electronscalefactors] (float eta, float pt) {
-            return electronscalefactors->evaluate({"2022Re-recoE+PromptFG", "sf", "Loose", eta, pt});
+        auto electron_eval_correction = [electronscalefactors] (const RVec<float>& eta, const RVec<float>& pt) {
+            return electronscalefactors->evaluate({"2022Re-recoE+PromptFG", "sf", "Loose", eta[0], pt[0]});
         };
 
         auto muon_cset = CorrectionSet::from_file("configs/scalefactors/muon.json");
         auto muonscalefactors = muon_cset->at("NUM_IsoMu24_DEN_CutBasedIdMedium_and_PFIsoMedium");
 
-        auto muon_eval_correction = [muonscalefactors] (float eta, float pt) {
-            return muonscalefactors->evaluate({eta, pt, "nominal"});
+        auto muon_eval_correction = [muonscalefactors] (const RVec<float>& eta, const RVec<float>& pt) {
+            return muonscalefactors->evaluate({eta[0], pt[0], "nominal"});
         };
 
-        return df.Define("electron_scale_factors", electron_eval_correction, {"electron_eta", "electron_pt"})
-            .Define("muon_scale_factors", muon_eval_correction, {"muon_eta", "muon_pt"})
+        return df.Define("electron_scale_factors", electron_eval_correction, {"Electron_eta", "Electron_pt"})
+            .Define("muon_scale_factors", muon_eval_correction, {"Muon_eta", "Muon_pt"})
             .Redefine("weights", [] (double weights, double electron_scale_factors, double muon_scale_factors) {return weights * electron_scale_factors * muon_scale_factors;}, {"weights", "electron_scale_factors", "muon_scale_factors"});
     }
 
