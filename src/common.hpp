@@ -39,28 +39,36 @@ using RNode = ROOT::RDF::RNode;
 using correction::CorrectionSet;
 using ROOT::VecOps::RVec;
 
-namespace Lepton {
-    RNode triggers(RNode df);
-    RNode preSelections(RNode df);
-    RNode defineVariables(RNode df);
+// Selections
+namespace MuonEG {
+    RNode leptonTriggers(RNode df);
+    RNode leptonSelections(RNode df);
+    RNode jetSelections(RNode df);
+    RNode selections(RNode df);
+}
+namespace Muon {
+    RNode leptonTriggers(RNode df);
+    RNode leptonSelections(RNode df);
+    RNode jetSelections(RNode df);
+    RNode selections(RNode df);
+}
+namespace EGamma {
+    RNode leptonTriggers(RNode df);
+    RNode leptonSelections(RNode df);
+    RNode jetSelections(RNode df);
     RNode selections(RNode df);
 }
 
-namespace Jet {
-    RNode preSelections(RNode df);
-    RNode defineVariables(RNode df);
-    RNode selections(RNode df);
-}
-
+// Weights
 namespace Weights {
     RNode goodRun(RNode df, json jf);
     RNode xsecWeights(RNode df, double xsec, double int_lumi, double n_events);
     RNode leptonScaleFactors(RNode df);
     RNode pileupCorrection(RNode df);
+    RNode jetEnergyCorrections(RNode df, std::string era, int era_hash);
 }
 
 // Plotting
 void makeHist(ROOT::RDF::RResultPtr<TH1D> mc, ROOT::RDF::RResultPtr<TH1D> data, const std::string &x_label, const std::string &filename);
-
 RooDataSet fit(std::string var, RNode df);
 #endif

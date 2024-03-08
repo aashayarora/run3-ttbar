@@ -1,0 +1,13 @@
+{
+    "leading_electron_pt": [80, 0, 160],
+    "leading_electron_eta": [25, -2.5, 2.5],
+    "leading_electron_phi": [10, -3.14, 3.14],
+    "subleading_electron_pt": [80, 0, 160],
+    "subleading_electron_eta": [25, -2.5, 2.5],
+    "subleading_electron_phi": [10, -3.14, 3.14],
+    "m_ll": [100, 80, 110],
+    "GJet_pt": [80, 0, 160],
+    "GJet_eta": [25, -2.5, 2.5],
+    "nGJet": [10,0,10],
+    "PV_npvs": [50, 10, 60]
+}

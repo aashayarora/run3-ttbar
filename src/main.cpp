@@ -1,17 +1,15 @@
 #include "common.hpp"
 
-#define INT_LUMI 21007.0
-#define X_SEC 98.88 
-#define SUMW 1417357887.633
+#define INT_LUMI 26671.7
 
-int main(int argc, char** argv) {
+void run(const char* mc_sample_name, const char* data_sample_name, bool save, bool report) {
     // Config
     std::string outputBasePath = "./output/";
     std::string input_datasets = "configs/input.json";
     std::string golden_jsons = "configs/goodrun/Cert_Collisions2022_355100_362760_Golden.json";
 
     // hist binning
-    std::ifstream ifs("configs/output.json");
+    std::ifstream ifs("configs/output_muoneg.json");
     json hist_bin_data = json::parse(ifs);
     std::map<std::string, std::vector<float>> hist_binning;
     for (const auto& [key, value] : hist_bin_data.items()) {
@@ -30,40 +28,40 @@ int main(int argc, char** argv) {
     std::ifstream datasets_ifs(input_datasets);
     json json_datasets = json::parse(datasets_ifs);
 
-    // possible migrate to correctionlib
     std::ifstream golden_json_ifs(golden_jsons);
     json golden_json = json::parse(golden_json_ifs);
+
+    double xsec = json_datasets["MC"][mc_sample_name]["xsec"];
+    double mc_sumw = json_datasets["MC"][mc_sample_name]["sumw"];
 
     cout << "Loaded configs..." << endl;
 
     // Build TChains from datasets defined in configs/datasets.json
     TChain* mcChain = new TChain("Events");
     TChain* dataChain = new TChain("Events");
-    for (auto mc_dataset : json_datasets["MC"]) {
+    for (auto mc_dataset : json_datasets["MC"][mc_sample_name]["files"]) {
         mcChain->Add((std::string(mc_dataset) + std::string("*.root")).c_str());
     }
-    for (auto data_dataset : json_datasets["Data"]) {
+    for (auto data_dataset : json_datasets["Data"][data_sample_name]["files"]) {
         dataChain->Add((std::string(data_dataset) + std::string("*.root")).c_str());
     }
 
     cout << "Loaded TChains..." << endl;
     // Run dataframes
-    ROOT::EnableImplicitMT(); // enable multithreaded rdfs
+    
     cout << "Running data..." << endl;
     ROOT::RDataFrame df_data(*dataChain);
     ROOT::RDF::Experimental::AddProgressBar(df_data);
     auto data_weighted = Weights::goodRun(df_data, golden_json);
-    auto data_lep_selected = Lepton::selections(data_weighted);
-    auto data_final = Jet::selections(data_lep_selected);
+    auto data_final = MuonEG::selections(data_weighted);
 
-    cout << "Running mc..." << endl;    
+    cout << "Running mc..." << endl;
     ROOT::RDataFrame df_mc(*mcChain);
     ROOT::RDF::Experimental::AddProgressBar(df_mc);
-    auto mc_xsec = Weights::xsecWeights(df_mc, X_SEC, INT_LUMI, SUMW);
+    auto mc_xsec = Weights::xsecWeights(df_mc, xsec, INT_LUMI, mc_sumw);
     auto mc_pileup = Weights::pileupCorrection(mc_xsec);
-    auto mc_lep_selected = Lepton::selections(mc_pileup);
-    auto mc_scalefactors = Weights::leptonScaleFactors(mc_lep_selected);
-    auto mc_final = Jet::selections(mc_scalefactors);
+    auto mc_final = MuonEG::selections(mc_pileup);
+    // auto mc_final = Weights::leptonScaleFactors(mc_selections);
 
     cout << "Running histograms..." << endl;
     // book all histogram calculations
@@ -87,15 +85,16 @@ int main(int argc, char** argv) {
     }
 
     // save screenshot and print report if prompted
-    if (argc == 2 && std::string(argv[1]) == "--SAVE") {
+    if (save) {
         cout << "--SAVE option selected, saving histograms and snapshots..." << endl;
         // Save snapshots after all cuts
         mc_final.Snapshot("Events", outputBasePath + std::string("mc.root") , finalVariables);
         data_final.Snapshot("Events", outputBasePath + std::string("data.root") , finalVariables);
     }
 
-    else if (argc == 2 && std::string(argv[1]) == "--REPORT") {
+    if (report) {
         // print reports
+        cout << "--REPORT option selected, print reports..." << endl;
         auto report_mc = df_mc.Report();
         auto report_data = df_data.Report();
         cout << "\n\n" << "MC Report:" << endl;
@@ -103,6 +102,23 @@ int main(int argc, char** argv) {
         cout << "\n\n" << "Data Report:" << endl;
         report_data->Print();
     }
+}
 
+int main(int argc, char** argv) {
+    // parse command line arguments
+    bool save = false;
+    bool report = false;
+    if (argc > 1) {
+        for (int i = 1; i < argc; i++) {
+            if (std::string(argv[i]) == "--save") {
+                save = true;
+            }
+            if (std::string(argv[i]) == "--report") {
+                report = true;
+            }
+        }
+    }
+    ROOT::EnableImplicitMT(16); // enable multithreaded rdfs
+    run("TTBar", "MuonEG", save, report);
     return 0;
 }

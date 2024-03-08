@@ -1,16 +1,63 @@
 {
-    "MC" :  
-        [
-            "/ceph/cms/store/mc/Run3Summer22EENanoAODv12/TTto2L2Nu_TuneCP5_13p6TeV_powheg-pythia8/NANOAODSIM/130X_mcRun3_2022_realistic_postEE_v6-v2/2520000/",
-            "/ceph/cms/store/mc/Run3Summer22EENanoAODv12/TTto2L2Nu_TuneCP5_13p6TeV_powheg-pythia8/NANOAODSIM/130X_mcRun3_2022_realistic_postEE_v6-v2/2530000/",
-            "/ceph/cms/store/mc/Run3Summer22EENanoAODv12/TTto2L2Nu_TuneCP5_13p6TeV_powheg-pythia8/NANOAODSIM/130X_mcRun3_2022_realistic_postEE_v6-v2/2540000/"
-        ],
-    "Data": 
-        [
-            "/ceph/cms/store/data/Run2022E/MuonEG/NANOAOD/22Sep2023-v1/2520000/",
-            "/ceph/cms/store/data/Run2022F/MuonEG/NANOAOD/22Sep2023-v1/2520000/",
-            "/ceph/cms/store/data/Run2022F/MuonEG/NANOAOD/22Sep2023-v1/30000/",
-            "/ceph/cms/store/data/Run2022F/MuonEG/NANOAOD/22Sep2023-v1/50000/",
-            "/ceph/cms/store/data/Run2022G/MuonEG/NANOAOD/22Sep2023-v1/2520000/"
-        ]
+    "MC": {
+        "TTBar": {
+            "files": [
+                "/ceph/cms/store/mc/Run3Summer22EENanoAODv12/TTto2L2Nu_TuneCP5_13p6TeV_powheg-pythia8/NANOAODSIM/130X_mcRun3_2022_realistic_postEE_v6-v2/2520000/",
+                "/ceph/cms/store/mc/Run3Summer22EENanoAODv12/TTto2L2Nu_TuneCP5_13p6TeV_powheg-pythia8/NANOAODSIM/130X_mcRun3_2022_realistic_postEE_v6-v2/2530000/",
+                "/ceph/cms/store/mc/Run3Summer22EENanoAODv12/TTto2L2Nu_TuneCP5_13p6TeV_powheg-pythia8/NANOAODSIM/130X_mcRun3_2022_realistic_postEE_v6-v2/2540000/"
+            ],
+            "xsec": 98.88,
+            "sumw": 1417357887.633
+        },
+        "DY": {
+            "files": [
+                "/ceph/cms/store/user/aaarora/Run3Summer22EENanoAODv12/DYto2L-2Jets_MLL-50_TuneCP5_13p6TeV_amcatnloFXFX-pythia8/NANOAODSIM/130X_mcRun3_2022_realistic_postEE_v6-v2/2520000/"
+            ],
+            "xsec": 6688.0,
+            "sumw": 354062582433.812
+        }
+    },
+
+    "Data": {
+        "MuonEG": {
+            "files": [
+                "/ceph/cms/store/data/Run2022E/MuonEG/NANOAOD/22Sep2023-v1/2520000/",
+                "/ceph/cms/store/data/Run2022F/MuonEG/NANOAOD/22Sep2023-v1/2520000/",
+                "/ceph/cms/store/data/Run2022F/MuonEG/NANOAOD/22Sep2023-v1/30000/",
+                "/ceph/cms/store/data/Run2022F/MuonEG/NANOAOD/22Sep2023-v1/50000/",
+                "/ceph/cms/store/data/Run2022G/MuonEG/NANOAOD/22Sep2023-v1/2520000/"
+            ]
+        },
+        "Muon": {
+            "files": [
+                "/ceph/cms/store/data/Run2022E/Muon/NANOAOD/22Sep2023-v1/2540000/",
+                "/ceph/cms/store/data/Run2022E/Muon/NANOAOD/22Sep2023-v1/30000/",
+                "/ceph/cms/store/data/Run2022E/Muon/NANOAOD/22Sep2023-v1/40000/",
+                "/ceph/cms/store/data/Run2022F/Muon/NANOAOD/22Sep2023-v2/2550000/",
+                "/ceph/cms/store/data/Run2022F/Muon/NANOAOD/22Sep2023-v2/2560000/",
+                "/ceph/cms/store/data/Run2022F/Muon/NANOAOD/22Sep2023-v2/60000/",
+                "/ceph/cms/store/data/Run2022F/Muon/NANOAOD/22Sep2023-v2/70000/",
+                "/ceph/cms/store/data/Run2022F/Muon/NANOAOD/22Sep2023-v2/80000/",
+                "/ceph/cms/store/data/Run2022G/Muon/NANOAOD/22Sep2023-v1/30000/",
+                "/ceph/cms/store/data/Run2022G/Muon/NANOAOD/22Sep2023-v1/40000/",
+                "/ceph/cms/store/data/Run2022G/Muon/NANOAOD/22Sep2023-v1/410000/"
+            ]
+        },
+        "EGamma": {
+            "files": [
+                "/ceph/cms/store/data/Run2022E/EGamma/NANOAOD/22Sep2023-v1/2530000/",
+                "/ceph/cms/store/data/Run2022E/EGamma/NANOAOD/22Sep2023-v1/40000/",
+                "/ceph/cms/store/data/Run2022E/EGamma/NANOAOD/22Sep2023-v1/50000/",
+                "/ceph/cms/store/data/Run2022F/EGamma/NANOAOD/22Sep2023-v1/2520000/",
+                "/ceph/cms/store/data/Run2022F/EGamma/NANOAOD/22Sep2023-v1/2540000/",
+                "/ceph/cms/store/data/Run2022F/EGamma/NANOAOD/22Sep2023-v1/30000/",
+                "/ceph/cms/store/data/Run2022F/EGamma/NANOAOD/22Sep2023-v1/50000/",
+                "/ceph/cms/store/data/Run2022F/EGamma/NANOAOD/22Sep2023-v1/510000/",
+                "/ceph/cms/store/data/Run2022G/EGamma/NANOAOD/22Sep2023-v2/2550000/",
+                "/ceph/cms/store/data/Run2022G/EGamma/NANOAOD/22Sep2023-v2/2560000/",
+                "/ceph/cms/store/data/Run2022G/EGamma/NANOAOD/22Sep2023-v2/70000/",
+                "/ceph/cms/store/data/Run2022G/EGamma/NANOAOD/22Sep2023-v2/80000/"
+            ]
+        }
+    }
 }

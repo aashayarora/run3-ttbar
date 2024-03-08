@@ -18,12 +18,12 @@ void makeHist(ROOT::RDF::RResultPtr<TH1D> mc, ROOT::RDF::RResultPtr<TH1D> data, 
     h_data.SetMarkerColor(kBlack);
     h_data.SetLineColor(kBlack);
 
-    auto rp = new TRatioPlot(&h_data, &h_mc);
+    auto rp = new TRatioPlot(&h_mc, &h_data);
     rp->Draw();
     rp->GetLowYaxis()->SetNdivisions(505);
 
     rp->GetUpperRefYaxis()->SetTitle("Events");
-    rp->GetLowerRefYaxis()->SetTitle("Data/MC");
+    rp->GetLowerRefYaxis()->SetTitle("MC/Data");
     rp->GetUpperPad()->cd();
 
     TLegend legend(.8,.75,.89,.89);
@@ -33,6 +33,12 @@ void makeHist(ROOT::RDF::RResultPtr<TH1D> mc, ROOT::RDF::RResultPtr<TH1D> data, 
     legend.AddEntry(&h_data, "Data", "PE1");
     legend.AddEntry(&h_mc, "MC", "f");
     legend.DrawClone();
+
+    // add a text box with integrals of the MC and data hists
+    TLatex text;
+    text.SetTextSize(0.03);
+    text.DrawLatexNDC(0.8, 0.6, Form("MC: %.0f", h_mc.Integral()));
+    text.DrawLatexNDC(0.8, 0.55, Form("Data: %.0f", h_data.Integral()));
 
     TLatex cms_label;
     cms_label.SetTextSize(0.04);
