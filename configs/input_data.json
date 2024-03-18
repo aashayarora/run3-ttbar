@@ -1,0 +1,17 @@
+{
+    "samples": {
+        "MuonEG": {
+            "trees": ["Events"],
+            "files": [
+                "/ceph/cms/store/data/Run2022E/MuonEG/NANOAOD/22Sep2023-v1/2520000/*.root",
+                "/ceph/cms/store/data/Run2022F/MuonEG/NANOAOD/22Sep2023-v1/2520000/*.root",
+                "/ceph/cms/store/data/Run2022F/MuonEG/NANOAOD/22Sep2023-v1/30000/*.root",
+                "/ceph/cms/store/data/Run2022F/MuonEG/NANOAOD/22Sep2023-v1/50000/*.root",
+                "/ceph/cms/store/data/Run2022G/MuonEG/NANOAOD/22Sep2023-v1/2520000/*.root"
+            ],
+            "metadata": {
+                "sample_category": "MuonEG"
+            }
+        }
+    }
+}

@@ -3,7 +3,7 @@ CPPFLAGS = -g -Wall -O2
 ROOTFLAGS = $(shell root-config --libs --cflags) -lRooFit -lRooFitCore -lRooStats -lMinuit -lFoam -lMathMore
 CORRECTIONLIBFLAGS = -I $(shell correction config --incdir --ldflags --rpath)
 
-MAKEFLAGS := --jobs=4
+MAKEFLAGS := --jobs=8
 
 SRCS = $(wildcard src/*.cpp)
 OBJS = $(patsubst src/%.cpp,build/%.o,$(SRCS))
@@ -11,6 +11,7 @@ OBJS = $(patsubst src/%.cpp,build/%.o,$(SRCS))
 TARGET = runAnalysis
 
 BUILD_DIR = build/
+OUTPUT_DIR = output/*
 
 all: oogabooga
 

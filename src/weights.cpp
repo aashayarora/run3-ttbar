@@ -1,26 +1,27 @@
-#include "common.hpp"
+#include "weights.hpp"
 
 namespace Weights {
-    RNode xsecWeights(RNode df, double xsec, double int_lumi, double n_events) {
-        double weight = xsec * int_lumi / n_events;
-        auto calcWeight = [weight](float genWeight){return genWeight * weight;};
-        return df.Define("weights", calcWeight, {"genWeight"});
+    RNode xsecWeights(RNode df) {
+        auto calcWeight = [](float genWeight, double xsec, double lumi, double sumw){return genWeight * xsec * lumi / sumw;};
+        return df.Define("weights", calcWeight, {"genWeight", "xsec", "lumi", "sumw"});
     }
+    
+    RNode pileupCorrection(RNode df){
+        auto cset = CorrectionSet::from_file("configs/pileup/puWeights.json");
+        auto pileupweights = cset->at("Collisions2022_359022_362760_eraEFG_GoldenJson");
 
-    RNode goodRun(RNode df, json jf) {
-        auto extract_from_gj = [jf](unsigned int run, unsigned int lumi) {
-            std::string run_str = std::to_string(run);
-            if (jf.contains(run_str)) { for (auto i : jf[run_str]) { if (lumi >= i[0]) {if (i[1] == -1 || lumi <= i[1]) { return 1.;}}} return 0.;}
-            else {return 0.;}
+        auto eval_correction = [pileupweights] (float ntrueint, double weights) {
+            return weights * pileupweights->evaluate({ntrueint, "nominal"});
         };
-        return df.Define("weights", extract_from_gj, {"run", "luminosityBlock"});
+
+        return df.Redefine("weights", eval_correction, {"Pileup_nTrueInt", "weights"});
     }
 
     RNode leptonScaleFactors(RNode df){
         auto electron_cset = CorrectionSet::from_file("configs/scalefactors/electron/electron.json");
         auto electronscalefactors = electron_cset->at("Electron-ID-SF");
         auto electron_eval_correction = [electronscalefactors] (const RVec<float>& eta, const RVec<float>& pt) {
-            return electronscalefactors->evaluate({"2022Re-recoE+PromptFG", "sf", "Medium", eta[0], pt[0]});
+            return electronscalefactors->evaluate({"2022Re-recoE+PromptFG", "sf", "wp80iso", eta[0], pt[0]});
         };
 
         auto muon_cset_ID_ISO = CorrectionSet::from_file("configs/scalefactors/muon/ScaleFactors_Muon_Z_ID_ISO_2022_EE_schemaV2.json");
@@ -44,6 +45,11 @@ namespace Weights {
             .Define("muon_scale_factors_ISO", muon_eval_correction_ISO, {"Muon_eta", "Muon_pt"})
             .Define("muon_scale_factors_HLT", muon_eval_correction_HLT, {"Muon_eta", "Muon_pt"})
             .Redefine("weights", [] (double weights, double electron_scale_factors, double muon_scale_factors_ID, double muon_scale_factors_ISO, double muon_scale_factors_HLT) {return weights * electron_scale_factors * muon_scale_factors_ID * muon_scale_factors_ISO * muon_scale_factors_HLT;}, {"weights", "electron_scale_factors", "muon_scale_factors_ID", "muon_scale_factors_ISO", "muon_scale_factors_HLT"});
+    }
+
+    RNode goodRun(lumiMask golden, RNode df){
+        auto goldenjson = [golden](unsigned int &run, unsigned int &luminosityBlock){return golden.accept(run, luminosityBlock);};
+        return df.Define("weights", goldenjson, {"run", "luminosityBlock"}); 
     }
 
     // RNode jetEnergyCorrections(RNode df, std::string era, int era_hash){
@@ -77,15 +83,4 @@ namespace Weights {
     //         return corrected_pt;
     //     }, {"Jet_pt", "Jet_rawFactor", "jet_energy_corrections"});
     // }
-
-    RNode pileupCorrection(RNode df){
-        auto cset = CorrectionSet::from_file("configs/pileup/puWeights.json");
-        auto pileupweights = cset->at("Collisions2022_359022_362760_eraEFG_GoldenJson");
-
-        auto eval_correction = [pileupweights] (float ntrueint, double weights) {
-            return weights * pileupweights->evaluate({ntrueint, "nominal"});
-        };
-
-        return df.Redefine("weights", eval_correction, {"Pileup_nTrueInt", "weights"});
-    }
 }
