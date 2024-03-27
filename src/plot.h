@@ -17,9 +17,7 @@
 using json = nlohmann::json;
 using RNode = ROOT::RDF::RNode;
 
-namespace Plot {
-    void makeHist(ROOT::RDF::RResultPtr<TH1D> mc, ROOT::RDF::RResultPtr<TH1D> data, const std::string &x_label, const std::string &filename);
-    void makePlots(std::string output_json, RNode mc_final, RNode data_final);
-}
+void makeHist(ROOT::RDF::RResultPtr<TH1D> mc, ROOT::RDF::RResultPtr<TH1D> data, const std::string &x_label, const std::string &filename);
+void makePlots(std::string output_json, RNode mc_final, RNode data_final);
 
 #endif

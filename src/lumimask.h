@@ -1,5 +1,5 @@
-#ifndef UTILS_HPP
-#define UTILS_HPP
+#ifndef LUMIMASK_H
+#define LUMIMASK_H
 
 #pragma once
 

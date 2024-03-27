@@ -1,28 +1,38 @@
-#include "utils.hpp"
+#include "utils.h"
 
-bool operator< ( const lumiMask::LumiBlockRange& lh, const lumiMask::LumiBlockRange& rh )
-{
-    return ( lh.run() == rh.run() ) ? ( lh.lastLumi() < rh.firstLumi() ) : lh.run() < rh.run();
+// Selection Utils
+float get_inv_mass(RVec<float> pt, RVec<float> eta, RVec<float> phi, RVec<float> mass) {
+    ROOT::Math::PtEtaPhiMVector p1(pt[0], eta[0], phi[0], mass[0]);
+    ROOT::Math::PtEtaPhiMVector p2(pt[1], eta[1], phi[1], mass[1]);
+    return (p1 + p2).M();
 }
 
-lumiMask lumiMask::fromJSON(const std::string& file, lumiMask::Run firstRun, lumiMask::Run lastRun)
-{
-  const bool noRunFilter = ( firstRun == 0 ) && ( lastRun == 0 );
-  boost::property_tree::ptree ptree;
-  boost::property_tree::read_json(file, ptree);
+// General Utils
+void saveSnapshot(RNode df, const std::string& finalFile) {
+    auto ColNames = df.GetColumnNames();
+    std::vector<std::string> final_variables;
+    // for (auto &&ColName : ColNames)
+    //     {
+    //         TString colName = ColName;
+    //         if(colName.Contains("P4")) continue;
+    //         if(colName.Contains("LHE")) continue;
+    //         if(colName.BeginsWith("FatJet")) continue;
+    //         if(colName.BeginsWith("PPS")) continue;
+    //         if(colName.BeginsWith("Gen")) continue;
+    //         if(colName.BeginsWith("Sub")) continue;
+    //         if(colName.BeginsWith("HLT")) continue;
+    //         if(colName.BeginsWith("Flag")) continue;
+    //         if(colName.BeginsWith("PS")) continue;
+    //         if(colName.BeginsWith("nCorr")) continue;
+    //         if(colName.BeginsWith("nGen")) continue;
+    //         if(colName.BeginsWith("nOther")) continue;
+    //         if(colName.BeginsWith("nSV")) continue;
 
-  std::vector<lumiMask::LumiBlockRange> accept;
-  for ( const auto& runEntry : ptree ) {
-    const lumiMask::Run run = std::stoul(runEntry.first);
-    if ( noRunFilter || ( ( firstRun <= run ) && ( run <= lastRun ) ) ) {
-      for ( const auto& lrEntry : runEntry.second ) {
-        const auto lrNd = lrEntry.second;
-        const lumiMask::LumiBlock firstLumi = std::stoul(lrNd.begin()->second.data());
-        const lumiMask::LumiBlock lastLumi  = std::stoul((++lrNd.begin())->second.data());
-        accept.emplace_back(run, firstLumi, lastLumi);
-      }
-    }
-  }
-  return lumiMask(accept);
+    //         std::string name = colName.Data();
+    //         final_variables.push_back(name);
+    //     }
+    final_variables.push_back("run");
+    final_variables.push_back("luminosityBlock");
+    final_variables.push_back("event");
+    df.Snapshot("Events", std::string("output/") + finalFile, final_variables);
 }
-

@@ -1,4 +1,4 @@
-#include "stats.hpp"
+#include "stats.h"
 
 RooDataSet fit(std::string var, RNode df) {   
     RooRealVar x(var.c_str(), var.c_str(), 0, 200);

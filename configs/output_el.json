@@ -1,0 +1,10 @@
+{
+    "leading_electron_pt": [80, 0, 160],
+    "leading_electron_eta": [25, -2.5, 2.5],
+    "leading_electron_phi": [10, -3.14, 3.14],
+    "subleading_electron_pt": [80, 0, 160],
+    "subleading_electron_eta": [25, -2.5, 2.5],
+    "subleading_electron_phi": [10, -3.14, 3.14],
+    "m_ee": [100, 10, 170],
+    "nGoodElectrons": [5, 0, 5]
+}
