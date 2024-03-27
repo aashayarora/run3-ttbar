@@ -16,15 +16,11 @@
 // ROOT Includes
 #include "TChain.h"
 
-// JSON parsing
-#include <nlohmann/json.hpp>
-
 #include "plot.hpp"
 #include "weights.hpp"
 #include "selections.hpp"
 #include "stats.hpp"
 
-using json = nlohmann::json;
 using std::cout, std::endl;
 using ROOT::RDF::RSampleInfo;
 

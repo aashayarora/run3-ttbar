@@ -1,0 +1,13 @@
+{
+    "samples": {
+        "Muon": {
+            "trees": ["Events"],
+            "files": [
+                "/ceph/cms/store/data/Run2022E/Muon/NANOAOD/22Sep2023-v1/2540000/054edb94-4284-428c-bb7d-e7d4d1ffb3bf.root"
+            ],
+            "metadata": {
+                "sample_category": "Muon"
+            }
+        }
+    }
+}
