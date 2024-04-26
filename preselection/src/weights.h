@@ -5,7 +5,7 @@
 #include "ROOT/RDFHelpers.hxx"
 #include "ROOT/RVec.hxx"
 
-#include "lumimask.h"
+#include "utils.h"
 #include "correction.h"
 
 using correction::CorrectionSet;
