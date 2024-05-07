@@ -2,83 +2,114 @@
     
 RNode goodRun(lumiMask golden, RNode df){
     auto goldenjson = [golden](unsigned int &run, unsigned int &luminosityBlock){return golden.accept(run, luminosityBlock);};
-    return df.Define("weights", goldenjson, {"run", "luminosityBlock"}); 
+    return df.Define("goodRun", goldenjson, {"run", "luminosityBlock"})
+            .Filter("goodRun == 1", "PASSES GOLDEN JSON"); 
 }
 
-RNode pileupCorrection(RNode df){
-    auto cset = CorrectionSet::from_file("configs/pileup/puWeights.json");
-    auto pileupweights = cset->at("Collisions2022_359022_362760_eraEFG_GoldenJson");
-
-    auto eval_correction = [pileupweights] (float ntrueint, double weights) {
-        return weights * pileupweights->evaluate({ntrueint, "nominal"});
+RNode pileupCorrection(correction::Correction::Ref cset_pileup, RNode df){
+    auto eval_correction = [cset_pileup] (float ntrueint) {
+        return cset_pileup->evaluate({ntrueint, "nominal"});
     };
 
-    return df.Redefine("weights", eval_correction, {"Pileup_nTrueInt", "weights"});
+    return df.Define("pileup_weight", eval_correction, {"Pileup_nTrueInt"});
 }
 
-// RNode leptonScaleFactors(RNode df){
-//     auto electron_cset = CorrectionSet::from_file("configs/scalefactors/electron/electron.json");
-//     auto electronscalefactors = electron_cset->at("Electron-ID-SF");
-//     float electron_sf_weight = 1;
-//     auto electron_eval_correction = [electronscalefactors] (const RVec<float>& eta, const RVec<float>& pt) {
-//         for (int i = 0; i < eta.size(); i++) {
-//             electron_sf_weight *= electronscalefactors->evaluate({"2022Re-recoE+PromptFG", "sf", "wp80iso", eta[i], pt[i]});
-//         }
-//         return electron_sf_weight;
-//     };
+RNode electronScaleFactors(correction::Correction::Ref cset_electron, RNode df){
+    auto eval_correction_ID = [cset_electron] (const RVec<float> eta, const RVec<float> pt) {
+        float electron_sf_weight = 1;
+        if (eta.size() == 0) {
+            return electron_sf_weight;
+        }
+        for (size_t i = 0; i < eta.size(); i++) {
+            electron_sf_weight *= cset_electron->evaluate({"2022Re-recoE+PromptFG", "sf", "Medium", eta[i], pt[i]});
+        }
+        return electron_sf_weight;
+    };
 
-//     auto muon_cset_ID_ISO = CorrectionSet::from_file("configs/scalefactors/muon/ScaleFactors_Muon_Z_ID_ISO_2022_EE_schemaV2.json");
-//     auto muonscalefactors_ID = muon_cset_ID_ISO->at("NUM_MediumID_DEN_TrackerMuons");
-//     auto muon_eval_correction_ID = [muonscalefactors_ID] (const RVec<float>& eta, const RVec<float>& pt) {
-//         return muonscalefactors_ID->evaluate({abs(eta[0]), pt[0], "nominal"});
-//     };
-//     auto muonscalefactors_ISO = muon_cset_ID_ISO->at("NUM_MediumMiniIso_DEN_MediumID");
-//     auto muon_eval_correction_ISO = [muonscalefactors_ISO] (const RVec<float>& eta, const RVec<float>& pt) {
-//         return muonscalefactors_ISO->evaluate({abs(eta[0]), pt[0], "nominal"});
-//     };
+    auto eval_correction_Reco = [cset_electron] (const RVec<float> eta, const RVec<float> pt) {
+        float electron_sf_weight = 1;
+        if (eta.size() == 0) {
+            return electron_sf_weight;
+        }
+        for (size_t i = 0; i < eta.size(); i++) {
+            if (pt[i] < 20) {
+                electron_sf_weight *= cset_electron->evaluate({"2022Re-recoE+PromptFG", "sf", "RecoBelow20", eta[i], pt[i]});
+            }
+            else if (pt[i] < 75) {
+                electron_sf_weight *= cset_electron->evaluate({"2022Re-recoE+PromptFG", "sf", "Reco20to75", eta[i], pt[i]});
+            }
+            else {
+                electron_sf_weight *= cset_electron->evaluate({"2022Re-recoE+PromptFG", "sf", "RecoAbove75", eta[i], pt[i]});
+            }
+        }
+        return electron_sf_weight;
+    };
 
-//     auto muon_cset_HLT = CorrectionSet::from_file("configs/scalefactors/muon/ScaleFactors_Muon_Z_HLT_2022_EE_abseta_pt_schemaV2.json");
-//     auto muonscalefactors_HLT = muon_cset_HLT->at("NUM_IsoMu24_DEN_CutBasedIdMedium_and_PFIsoMedium");
-//     auto muon_eval_correction_HLT = [muonscalefactors_HLT] (const RVec<float>& eta, const RVec<float>& pt) {
-//         return muonscalefactors_HLT->evaluate({abs(eta[0]), pt[0], "nominal"});
-//     };
+    auto electron_sf_weight = [eval_correction_ID, eval_correction_Reco] (const RVec<float> eta, const RVec<float> pt) {
+        return eval_correction_ID(eta, pt) * eval_correction_Reco(eta, pt);
+    };
 
-//     return df.Define("electron_scale_factors", electron_eval_correction, {"Electron_eta", "Electron_pt"})
-//         .Define("muon_scale_factors_ID", muon_eval_correction_ID, {"Muon_eta", "Muon_pt"})
-//         .Define("muon_scale_factors_ISO", muon_eval_correction_ISO, {"Muon_eta", "Muon_pt"})
-//         .Define("muon_scale_factors_HLT", muon_eval_correction_HLT, {"Muon_eta", "Muon_pt"})
-//         .Redefine("weights", [] (double weights, double electron_scale_factors, double muon_scale_factors_ID, double muon_scale_factors_ISO, double muon_scale_factors_HLT) {return weights * electron_scale_factors * muon_scale_factors_ID * muon_scale_factors_ISO * muon_scale_factors_HLT;}, {"weights", "electron_scale_factors", "muon_scale_factors_ID", "muon_scale_factors_ISO", "muon_scale_factors_HLT"});
-// }
+    return df.Define("electron_scale_factors", electron_sf_weight, {"GElectron_eta", "GElectron_pt"});
+}
+
+RNode muonScaleFactors(correction::Correction::Ref cset_muon_ID, correction::Correction::Ref cset_muon_ISO, correction::Correction::Ref cset_muon_HLT, RNode df){
+    auto eval_correction_ID = [cset_muon_ID] (const RVec<float> eta, const RVec<float> pt) {
+        float muon_sf_weight = 1;
+        if (eta.size() == 0) {
+            return muon_sf_weight;
+        }
+        for (size_t i = 0; i < eta.size(); i++) {
+            muon_sf_weight *= cset_muon_ID->evaluate({abs(eta[i]), pt[i], "nominal"});
+        }
+        return muon_sf_weight;
+    };
+
+    auto eval_correction_ISO = [cset_muon_ISO] (const RVec<float> eta, const RVec<float> pt) {
+        float muon_sf_weight = 1;
+        if (eta.size() == 0) {
+            return muon_sf_weight;
+        }
+        for (size_t i = 0; i < eta.size(); i++) {
+            muon_sf_weight *= cset_muon_ISO->evaluate({abs(eta[i]), pt[i], "nominal"});
+        }
+        return muon_sf_weight;
+    };
+
+    auto eval_correction_HLT = [cset_muon_HLT] (const RVec<float> eta, const RVec<float> pt) {
+        float muon_sf_weight = 1;
+        // if (eta.size() == 0) {
+        //     return muon_sf_weight;
+        // }
+        // for (size_t i = 0; i < eta.size(); i++) {
+        //     muon_sf_weight *= cset_muon_HLT->evaluate({abs(eta[i]), pt[i], "nominal"});
+        // }
+        return muon_sf_weight;
+    };
+
+    auto muon_sf_weight = [eval_correction_ID, eval_correction_ISO, eval_correction_HLT] (const RVec<float> eta, const RVec<float> pt) {
+        return eval_correction_ID(eta, pt) * eval_correction_ISO(eta, pt) * eval_correction_HLT(eta, pt);
+    };
+
+    return df.Define("muon_scale_factors", muon_sf_weight, {"GMuon_eta", "GMuon_pt"});
+}
+
+RNode jetveto(correction::Correction::Ref cset_jet_veto, RNode df){
+    auto eval_correction = [cset_jet_veto] (const RVec<float> eta, const RVec<float> phi) {
+        float jet_sf_weight = 1;
+        if (eta.size() == 0) {
+            return jet_sf_weight;
+        }
+        for (size_t i = 0; i < eta.size(); i++) {
+            jet_sf_weight *= cset_jet_veto->evaluate({"jetvetomap", eta[i], phi[i]});
+        }
+        return jet_sf_weight;
+    };
+
+    return df.Define("jet_veto", eval_correction, {"loosejet_eta", "loosejet_phi"})
+            .Filter("jet_veto == 0", "Jet Veto Maps");
+}
 
 
-// RNode jetEnergyCorrections(RNode df, std::string era, int era_hash){
-//     auto jet_cset = CorrectionSet::from_file("configs/scalefactors/jet/jet_jerc.json");
-//     std::hash<std::string> str_hash;
-//     correction::Correction::Ref& jetscalefactors;
-//     switch (str_hash(era)){
-//         case era_hash:
-//             jetscalefactors = jet_cset->at("Summer22EE_22Sep2023_RunE_V2_DATA_L1L2L3Res_AK4PFPuppi");
-//             break;
-//         case era_hash:
-//             jetscalefactors = jet_cset->at("Summer22EE_22Sep2023_RunF_V2_DATA_L1L2L3Res_AK4PFPuppi");
-//             break;
-//         case era_hash:
-//             jetscalefactors = jet_cset->at("Summer22EE_22Sep2023_RunG_V2_DATA_L1L2L3Res_AK4PFPuppi");
-//             break;
-//         default:
-//             jetscalefactors = jet_cset->at("Summer22EE_22Sep2023_V2_MC_L1FastJet_AK4PFPuppi");
-//     };
-//     auto eval_correction = [jetscalefactors] (const RVec<float>& area, const RVec<float>& eta, const RVec<float>& pt, const RVec<float>& raw_factor, const float rho) {
-//         RVec<float> jet_energy_corrections;
-//         for (int i = 0; i < area.size(); i++) {
-//             jet_energy_corrections.push_back(jetscalefactors->evaluate({area[i], eta[i], pt[i] * (1-raw_factor[i]), rho}));
-//         }
-//     };
-//     return df.Define("Jet_CPt", [jetEnergyCorrections](const RVec<float>& pt, const RVec<float>& raw_factor, const RVec<float>& jet_energy_corrections) {
-//         RVec<float> corrected_pt;
-//         for (int i = 0; i < pt.size(); i++) {
-//             corrected_pt.push_back(pt[i] * (1-raw_factor[i]) * jet_energy_corrections[i]);
-//         }
-//         return corrected_pt;
-//     }, {"Jet_pt", "Jet_rawFactor", "jet_energy_corrections"});
-// }
+RNode finalMCWeight(RNode df){
+    return df.Define("weight", "pileup_weight * electron_scale_factors * muon_scale_factors * xsec_weight * genWeight");
+}

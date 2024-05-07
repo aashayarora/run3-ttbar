@@ -1,30 +1,28 @@
-// C++ Includes
-#include <iostream>
-
-// RDF Includes
 #include "ROOT/RDataFrame.hxx"
-#include "ROOT/RDFHelpers.hxx"
-#include "ROOT/RVec.hxx"
 
 #include "weights.h"
 #include "selections.h"
 #include "utils.h"
 
-using std::cout, std::endl;
-using ROOT::RDF::RSampleInfo;
+#include "correction.h"
+using correction::CorrectionSet;
+
+#include "argparser.hpp"
+
+struct MyArgs : public argparse::Args {
+    std::string &spec = kwarg("i,input", "spec.json path");
+    std::string &output = kwarg("o,output", "output root file");
+    bool &isData = flag("data", "is data");
+};
 
 int main(int argc, char** argv) {
-    // Config
-    if (argc != 2) {
-        cout << "Usage: " << argv[0] << " <input_spec>" << endl;
-        return 0;
-    }
-    std::string input_spec = argv[1];
+    auto args = argparse::parse<MyArgs>(argc, argv);
+    std::string input_spec = args.spec;
     
-    // golden json lumimask
-    const auto LumiMask = lumiMask::fromJSON("corrections/goodrun/Cert_Collisions2022_355100_362760_Golden.json");
-
-    ROOT::EnableImplicitMT();
+    /*
+    ANALYSIS
+    */
+    ROOT::EnableImplicitMT(16);
     ROOT::RDataFrame df_ = ROOT::RDF::Experimental::FromSpec(input_spec);
     ROOT::RDF::Experimental::AddProgressBar(df_);
 
@@ -34,18 +32,20 @@ int main(int argc, char** argv) {
     auto df2 = triggerSelections(df1);
     auto df3 = leptonSelections(df2);
     auto df4 = jetSelections(df3);
+    // auto df4 = jetveto(cset_jet_veto, df45); // wait for it to get fixed
     auto df5 = bJetSelections(df4);
 
-    // data only corrections
-    auto df_data = df5.Filter("isData");
-    auto df_data_final = goodRun(LumiMask, df_data);
-    saveSnapshot(df_data_final, "data.root");
-
-    // MC only corrections
-    auto df_mc = df5.Filter("!isData");
-    auto df_mc_final = pileupWeight(df_mc);
-    saveSnapshot(df_mc_final, "mc.root");
-
+    if (args.isData) {
+        auto df_data_final = goodRun(LumiMask, df5);
+        saveSnapshot(df_data_final, args.output);
+    }
+    else {
+        auto df_pileup = pileupCorrection(cset_pileup, df5);
+        auto df_electron_sf = electronScaleFactors(cset_electron, df_pileup);
+        auto df_muon_sf = muonScaleFactors(cset_muon_ID, cset_muon_ISO, cset_muon_HLT, df_electron_sf);
+        auto df_mc_final = finalMCWeight(df_muon_sf); // remember to add weights to finalMCWeight everytime.
+        saveSnapshot(df_mc_final, args.output);
+    }
     // print cutflow
     auto report = df_.Report();
     report->Print();

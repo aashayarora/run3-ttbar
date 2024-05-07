@@ -2,3 +2,4 @@ output/
 bin/
 build/
 .vscode/
+plots/

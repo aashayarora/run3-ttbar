@@ -36,13 +36,10 @@ lumiMask lumiMask::fromJSON(const std::string& file, lumiMask::Run firstRun, lum
 
 RNode defineMetadata(RNode df){
     return df.DefinePerSample("xsec_weight", [](unsigned int slot, const RSampleInfo &id) { return id.GetD("xsec_weight");})
-            .DefinePerSample("sample_category", [](unsigned int slot, const RSampleInfo &id) { return id.GetS("sample_category");})
-            .DefinePerSample("sample_type", [](unsigned int slot, const RSampleInfo &id) { return id.GetS("sample_type");})
-            .DefinePerSample("sample_year", [](unsigned int slot, const RSampleInfo &id) { return id.GetS("sample_year");})
-            .Define("isData", "sample_category == \"data\"")
-            .Define("is2016", "sample_year == \"2016preVFP\" || sample_year == \"2016postVFP\"")
-            .Define("is2017", "sample_year == \"2017\"")
-            .Define("is2018", "sample_year == \"2018\"");
+        .DefinePerSample("sample_category", [](unsigned int slot, const RSampleInfo &id) { return id.GetS("sample_category");})
+        .DefinePerSample("sample_type", [](unsigned int slot, const RSampleInfo &id) { return id.GetS("sample_type");})
+        .DefinePerSample("sample_year", [](unsigned int slot, const RSampleInfo &id) { return id.GetS("sample_year");})
+        .Define("isData", "sample_category == \"data\"");
 }
 
 /*
@@ -75,7 +72,7 @@ RVec<float> fDeltaR (RVec<float> vec_eta, RVec<float> vec_phi, float obj_eta, fl
 }
 
 void saveSnapshot(RNode df, const std::string& finalFile) {
-    auto ColNames = df.GetColumnNames();
+    auto ColNames = df.GetDefinedColumnNames();
     std::vector<std::string> final_variables;
     for (auto &&ColName : ColNames)
         {
@@ -83,6 +80,5 @@ void saveSnapshot(RNode df, const std::string& finalFile) {
             std::string name = colName.Data();
             final_variables.push_back(name);
         }
-    df.Snapshot("Events", finalFile, final_variables);
+    df.Snapshot("Events", std::string("/data/userdata/aaarora/output/") + finalFile, final_variables);
 }
-

@@ -19,8 +19,8 @@
 #include "TString.h"
 
 using RNode = ROOT::RDF::RNode;
+using ROOT::RDF::RSampleInfo;
 using ROOT::VecOps::RVec;
-
 /*
     LUMIMASK
 */

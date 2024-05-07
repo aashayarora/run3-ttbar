@@ -1,0 +1,20 @@
+{
+    "samples":
+    {
+        "Muon": {
+            "trees": ["Events"],
+            "files": [
+                "/ceph/cms/store/data/Run2022E/Muon/NANOAOD/22Sep2023-v1/2540000/*.root",
+                "/ceph/cms/store/data/Run2022E/Muon/NANOAOD/22Sep2023-v1/30000/*.root",
+                "/ceph/cms/store/data/Run2022E/Muon/NANOAOD/22Sep2023-v1/40000/*.root"
+            ],
+            "metadata": {
+                "xsec_weight": 1.0,
+                "sample_category": "Muon",
+                "sample_type": "data",
+                "sample_year": "2022"
+
+            }
+        }
+    }
+}

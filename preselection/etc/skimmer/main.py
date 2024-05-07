@@ -33,8 +33,8 @@ def run_dataframe(sample, output, use_condor=False):
         # selections
         all_cols = df.GetColumnNames()
         selected_cols = [col for col in all_cols if "Electron" in str(col) or "Muon" in str(col) or "Jet" in str(col) or "Tau" in str(col) or "GenPart" in str(col) or "Generator" in str(col) or "FatJet" in str(col) or "MET" in str(col) or "event" in str(col) or "run" in str(col) or "luminosityBlock" in str(col) or "LHE" in str(col) or "Weight" in str(col) or "Flag" in str(col) or "SubJet" in str(col) or ("HLT" in str(col) and ("Ele" in str(col) or "Mu" in str(col))) or "PV" in str(col) or "Pileup" in str(col)]
-        df = df.Define("goodElectrons", "Electron_pt > 7 && abs(Electron_eta) < 2.5") \
-               .Define("goodMuons", "Muon_pt > 5 && abs(Muon_eta) < 2.4") \
+        df = df.Define("goodElectrons", "Electron_pt > 10 && abs(Electron_eta) < 2.5") \
+               .Define("goodMuons", "Muon_pt > 10 && abs(Muon_eta) < 2.4") \
                .Define("nGoodElectrons", "nElectron == 0 ? 0 : Sum(goodElectrons)") \
                .Define("nGoodMuons", "nMuon == 0 ? 0 : Sum(goodMuons)")
           
@@ -48,13 +48,13 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     sample_list_data = lambda sample : glob(f"/ceph/cms/store/data/Run2022*/{sample}/NANOAOD/22Sep2023-v*/*")
-    samples = sample_list_data("EGamma") + sample_list_data("Muon") + sample_list_data("MuonEG")
+    samples = sample_list_data("EGamma")
     
     for i, sample in enumerate(samples):
         print(sample)
         tmp = sample.split("/ceph/cms/store/data/")[1].split("/")
         pathlib.Path(f"/data/userdata/aaarora/run3skims/{tmp[0]}/{tmp[1]}/{(i+1)*1000}").mkdir(parents=True, exist_ok=True)
 
-        output = f"/data/userdata/aaarora/run3skims/{tmp[0]}/{tmp[1]}/{(i+1)*1000}/output.root"
+        output = f"/ceph/cms/store/user/aaarora/output/"
 
         run_dataframe(sample + "/*.root", output, args.use_condor)
